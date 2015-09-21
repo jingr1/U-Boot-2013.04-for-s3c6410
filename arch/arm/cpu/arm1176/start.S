@@ -234,8 +234,17 @@ skip_tcmdisable:
 	 */
 	bl	lowlevel_init		/* go setup pll,mux,memory(DDR), in lowlevel_init.S */
 
+	/*call BootCopyMMCtoMem  BL1*/
+#if defined(CONFIG_BOOT_SD) && !defined(CONFIG_NAND_SPL)
+	ldr sp, =CONFIG_SYS_INIT_SP_ADDR
+	bl BootCopyMMCtoMem
+	cmp r0, #0
+copyerror:
+	beq copyerror
+	ldr pc, =_main
+#else
 	bl	_main				/*in crt0.S, Set up initial C runtime environment(sp) and call board_init_f(0)*/
-
+#endif
 /*------------------------------------------------------------------------------*/
 
 /*

@@ -257,7 +257,8 @@
 				 48, 49, 50, 51, 52, 53, 54, 55, \
 				 56, 57, 58, 59, 60, 61, 62, 63}
 
-/* Boot configuration (define only one of next 3) */
+/* Boot configuration (define only one of next 4) */
+#define CONFIG_BOOT_SD  /*SD BOOT*/
 #define CONFIG_BOOT_NAND
 /* None of these are currently implemented. Left from the original Samsung
  * version for reference
@@ -265,7 +266,6 @@
 #define CONFIG_BOOT_MOVINAND
 #define CONFIG_BOOT_ONENAND
 */
-
 #define CONFIG_NAND
 #define CONFIG_NAND_S3C64XX
 /* Unimplemented or unsupported. See comment above.
