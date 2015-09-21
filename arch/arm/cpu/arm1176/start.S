@@ -45,21 +45,31 @@
  *************************************************************************
  *
  * Jump vector table as in table 3.1 in [1]
+ * @向量跳转表，每条占四个字节（一个字），地址范围为0x0000 0000～@0x0000 0020
  *
  *************************************************************************
  */
-
+/******************************************************
+;当一个异常出现以后，ARM会自动执行以下几个步骤:
+;1.把下一条指令的地址放到连接寄存器LR(通常是R14).---保存位置
+;2.将相应的CPSR(当前程序状态寄存器)复制到SPSR(备份的程序状态寄存器)中---保存CPSR
+;3.根据异常类型，强制设置CPSR的运行模式位
+;4.强制PC(程序计数器)从相关异常向量地址取出下一条指令执行，从而跳转到相应的异常处理程序中
+*********************************************************/
 .globl _start
-_start: b	reset
+_start: b	reset   /*0x00000000*/
 #ifndef CONFIG_NAND_SPL
-	ldr	pc, _undefined_instruction
-	ldr	pc, _software_interrupt
+	ldr	pc, _undefined_instruction  /*0x00000004*/
+	ldr	pc, _software_interrupt		/*0x00000008*/
 	ldr	pc, _prefetch_abort
 	ldr	pc, _data_abort
 	ldr	pc, _not_used
-	ldr	pc, _irq
-	ldr	pc, _fiq
+	ldr	pc, _irq					/*0x00000018*/
+	ldr	pc, _fiq					/*0x0000001c*/
 
+/*.word为GNU ARM汇编特有的伪操作，为分配一段字内存单元（分配的单元为字对齐的），
+可以使用.word把标志符作为常量使用。如_fiq:.word fiq即把fiq存入内存变量_fiq中，
+也即是把fiq放到地址_fiq中*/
 _undefined_instruction:
 	.word undefined_instruction
 _software_interrupt:
@@ -75,14 +85,14 @@ _irq:
 _fiq:
 	.word fiq
 _pad:
-	.word 0x12345678 /* now 16*4=64 */
+	.word 0x12345678 /* now 16*4=64 *//*0x00000040*/
 #else
 	. = _start + 64
 #endif
 
 .global _end_vect
 _end_vect:
-	.balignl 16,0xdeadbeef
+	.balignl 16,0xdeadbeef /*以下代码16字节对齐，不足之处，用0xdeadbeef填充*/
 /*
  *************************************************************************
  *
@@ -98,7 +108,7 @@ _end_vect:
 
 .globl _TEXT_BASE
 _TEXT_BASE:
-	.word	CONFIG_SYS_TEXT_BASE
+	.word	CONFIG_SYS_TEXT_BASE    /* defined in config.mk*/
 
 /*
  * Below variable is very important because we use MMU in U-Boot.
@@ -138,7 +148,7 @@ IRQ_STACK_START_IN:
 
 reset:
 	/*
-	 * set the cpu to SVC32 mode
+	 * set the cpu to SVC32 mode, config cpsr register
 	 */
 	mrs	r0, cpsr
 	bic	r0, r0, #0x3f
@@ -182,7 +192,7 @@ cpu_init_crit:
 	orr	r0, r0, #0x00001000	@ set bit 12 (I) I-Cache
 
 	/* Prepare to disable the MMU */
-	adr	r2, mmu_disable_phys
+	adr	r2, mmu_disable_phys      /*read the address of mmu_disable_phys to r2 */
 	sub	r2, r2, #(CONFIG_SYS_PHY_UBOOT_BASE - CONFIG_SYS_TEXT_BASE)
 	b	mmu_disable
 
@@ -213,7 +223,7 @@ skip_tcmdisable:
 #endif
 
 #ifdef CONFIG_PERIPORT_REMAP
-	/* Peri port setup */
+	/* Peri port setup 外设基地址*/
 	ldr	r0, =CONFIG_PERIPORT_BASE
 	orr	r0, r0, #CONFIG_PERIPORT_SIZE
 	mcr	p15,0,r0,c15,c2,4
@@ -222,10 +232,19 @@ skip_tcmdisable:
 	/*
 	 * Go setup Memory and board specific bits prior to relocation.
 	 */
-	bl	lowlevel_init		/* go setup pll,mux,memory */
+	bl	lowlevel_init		/* go setup pll,mux,memory(DDR), in lowlevel_init.S */
 
-	bl	_main
-
+	/*call BootCopyMMCtoMem  BL1*/
+#if defined(CONFIG_BOOT_SD) && !defined(CONFIG_NAND_SPL)
+	ldr sp, =CONFIG_SYS_INIT_SP_ADDR
+	bl BootCopyMMCtoMem
+	cmp r0, #0
+copyerror:
+	beq copyerror
+	ldr pc, =_main
+#else
+	bl	_main				/*in crt0.S, Set up initial C runtime environment(sp) and call board_init_f(0)*/
+#endif
 /*------------------------------------------------------------------------------*/
 
 /*
@@ -239,7 +258,7 @@ skip_tcmdisable:
 relocate_code:
 	mov	r4, r0	/* save addr_sp */
 	mov	r5, r1	/* save addr of gd */
-	mov	r6, r2	/* save addr of destination */
+	mov	r6, r2	/* save addr of destination,the start address for u-boot in SDRAM */
 
 	adr	r0, _start
 	cmp	r0, r6
@@ -336,7 +355,7 @@ skip_hw_init:
 
 relocate_done:
 
-	bx	lr
+	bx	lr    /*Crt0.S  here: after relocate, go to clear BSS.*/
 
 _rel_dyn_start_ofs:
 	.word __rel_dyn_start - _start
@@ -496,7 +515,7 @@ phy_last_jump:
 undefined_instruction:
 	get_bad_stack
 	bad_save_user_regs
-	bl	do_undefined_instruction
+	bl	do_undefined_instruction  /* in interrupts.c*/
 
 	.align	5
 software_interrupt:

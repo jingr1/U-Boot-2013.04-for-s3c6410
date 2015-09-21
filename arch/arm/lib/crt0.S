@@ -93,26 +93,28 @@
 
 .global _main
 
-_main:
+_main:    /*call by start.S*/
 
 /*
  * Set up initial C runtime environment and call board_init_f(0).
+ * set up stack
  */
 
 #if defined(CONFIG_NAND_SPL)
 	/* deprecated, use instead CONFIG_SPL_BUILD */
-	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
+	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)  /*0x0c002000 smdk6410.h*/
 #elif defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_STACK)
 	ldr	sp, =(CONFIG_SPL_STACK)
 #else
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
 #endif
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
-	sub	sp, #GD_SIZE	/* allocate one GD above SP */
+	sub	sp, #GD_SIZE	/* allocate one GD above SP, GD_SIZE define in generated/generic-asm-offsets.h
+	sizeof(struct global_data) = 152  global_data define in include/asm-generic/global_data.h */
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	mov	r8, sp		/* GD is above SP */
 	mov	r0, #0
-	bl	board_init_f
+	bl	board_init_f     /*in arch/arm/lib/board.c */
 
 #if ! defined(CONFIG_SPL_BUILD)
 
@@ -121,7 +123,7 @@ _main:
  * relocate_code(addr_sp, gd, addr_moni). Trick here is that
  * we'll return 'here' but relocated.
  */
-
+	/*set up new sp*/
 	ldr	sp, [r8, #GD_START_ADDR_SP]	/* r8 = gd->start_addr_sp */
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	ldr	r8, [r8, #GD_BD]		/* r8 = gd->bd */
@@ -130,16 +132,16 @@ _main:
 	adr	lr, here
 	ldr	r0, [r8, #GD_RELOC_OFF]		/* lr = gd->start_addr_sp */
 	add	lr, lr, r0
-	ldr	r0, [r8, #GD_START_ADDR_SP]	/* r0 = gd->start_addr_sp */
+	ldr	r0, [r8, #GD_START_ADDR_SP]	/* r0 = gd->start_addr_sp */ /*sp*/
 	mov	r1, r8				/* r1 = gd */
-	ldr	r2, [r8, #GD_RELOCADDR]		/* r2 = gd->relocaddr */
-	b	relocate_code
+	ldr	r2, [r8, #GD_RELOCADDR]		/* r2 = gd->relocaddr */  /*relocate address*/
+	b	relocate_code			/*in start.S*/
 here:
 
 /* Set up final (full) environment */
 
-	bl	c_runtime_cpu_setup	/* we still call old routine here */
-
+	bl	c_runtime_cpu_setup	/* we still call old routine here ,in start.S  mov	pc, lr */
+/* clear BSS */
 	ldr	r0, =__bss_start	/* this is auto-relocated! */
 	ldr	r1, =__bss_end__	/* this is auto-relocated! */
 
@@ -154,6 +156,7 @@ clbss_l:cmp	r0, r1			/* while not at end of BSS */
 	bl red_led_on
 #endif
 
+/*now running in from RAM*/
 #if defined(CONFIG_NAND_SPL)
 
 	/* call _nand_boot() */
@@ -165,7 +168,7 @@ clbss_l:cmp	r0, r1			/* while not at end of BSS */
 	mov	r0, r8			/* gd_t */
 	ldr	r1, [r8, #GD_RELOCADDR]	/* dest_addr */
 	/* call board_init_r */
-	ldr	pc, =board_init_r	/* this is auto-relocated! */
+	ldr	pc, =board_init_r	/* this is auto-relocated! to the board.c */
 
 #endif
 

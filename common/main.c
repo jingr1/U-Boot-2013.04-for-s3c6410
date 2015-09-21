@@ -349,7 +349,7 @@ static void process_fdt_options(const void *blob)
 
 
 /****************************************************************************/
-
+/*U-boot setup management */
 void main_loop (void)
 {
 #ifndef CONFIG_SYS_HUSH_PARSER

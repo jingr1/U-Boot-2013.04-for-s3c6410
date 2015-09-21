@@ -28,6 +28,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA 02111-1307 USA
  */
+/* macro define*/
 
 #ifndef __CONFIG_H
 #define __CONFIG_H
@@ -45,7 +46,7 @@
 #define CONFIG_PERIPORT_SIZE	0x13
 
 #define CONFIG_SYS_IRAM_BASE    0x0c000000  /* Internal SRAM base address */
-#define CONFIG_SYS_IRAM_SIZE    0x2000      /* 8 KB of internal SRAM memory */
+#define CONFIG_SYS_IRAM_SIZE    0x2000      /* 8 KB of internal SRAM memory 8*1024 */
 #define CONFIG_SYS_IRAM_END     (CONFIG_SYS_IRAM_BASE + CONFIG_SYS_IRAM_SIZE)
 #define CONFIG_SYS_INIT_SP_ADDR (CONFIG_SYS_IRAM_END - GENERATED_GBL_DATA_SIZE)
 
@@ -85,7 +86,7 @@
 /*
  * select serial console configuration
  */
-#define CONFIG_SERIAL1          1	/* we use SERIAL 1 on SMDK6400	*/
+#define CONFIG_SERIAL1          1	/* we use SERIAL 1 on SMDK6410	*/
 
 #define CONFIG_SYS_HUSH_PARSER			/* use "hush" command parser	*/
 
@@ -256,7 +257,8 @@
 				 48, 49, 50, 51, 52, 53, 54, 55, \
 				 56, 57, 58, 59, 60, 61, 62, 63}
 
-/* Boot configuration (define only one of next 3) */
+/* Boot configuration (define only one of next 4) */
+#define CONFIG_BOOT_SD  /*SD BOOT*/
 #define CONFIG_BOOT_NAND
 /* None of these are currently implemented. Left from the original Samsung
  * version for reference
@@ -264,7 +266,6 @@
 #define CONFIG_BOOT_MOVINAND
 #define CONFIG_BOOT_ONENAND
 */
-
 #define CONFIG_NAND
 #define CONFIG_NAND_S3C64XX
 /* Unimplemented or unsupported. See comment above.

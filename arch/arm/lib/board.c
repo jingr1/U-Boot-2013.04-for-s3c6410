@@ -333,7 +333,7 @@ void board_init_f(ulong bootflag)
 	gd->ram_size -= CONFIG_SYS_MEM_TOP_HIDE;
 #endif
 
-	addr = CONFIG_SYS_SDRAM_BASE + gd->ram_size;
+	addr = CONFIG_SYS_SDRAM_BASE + gd->ram_size;  /*0x58000000 0x50000000~0x57ffffff = 128MB SDRAM*/
 
 #ifdef CONFIG_LOGBUFFER
 #ifndef CONFIG_ALT_LB_ADDR
@@ -358,8 +358,8 @@ void board_init_f(ulong bootflag)
 	gd->arch.tlb_size = 4096 * 4;
 	addr -= gd->arch.tlb_size;
 
-	/* round down to next 64 kB limit */
-	addr &= ~(0x10000 - 1);
+	/* round down to next 64 kB limit 0x57ff0000~0x57ffffff*/
+	addr &= ~(0x10000 - 1);	/*addr & ffff0000*/
 
 	gd->arch.tlb_addr = addr;
 	debug("TLB table from %08lx to %08lx\n", addr, addr + gd->arch.tlb_size);
@@ -512,7 +512,7 @@ static void display_fdt_model(const void *blob)
  * running from RAM and have a "normal" C environment, i. e. global
  * data can be written, BSS has been cleared, the stack size in not
  * that critical any more, etc.
- *
+ * stage2 start
  ************************************************************************
  */
 
@@ -700,7 +700,7 @@ void board_init_r(gd_t *id, ulong dest_addr)
 
 	/* main_loop() can return to retry autoboot, if so just run it again. */
 	for (;;) {
-		main_loop();
+		main_loop();    /* commom/main.c */
 	}
 
 	/* NOTREACHED - no way out of command loop except booting */
