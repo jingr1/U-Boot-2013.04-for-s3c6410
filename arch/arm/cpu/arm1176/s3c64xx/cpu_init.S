@@ -32,15 +32,19 @@
 
 	.globl mem_ctrl_asm_init
 mem_ctrl_asm_init:
+
+	/*配置CPU的动态内存控制器*/
 	/* DMC1 base address 0x7e001000 */
 	ldr	r0, =ELFIN_DMC1_BASE
 
+	/* makes DRAM Controller enter ‘Config’ state*/
 	ldr	r1, =0x4
 	str	r1, [r0, #INDEX_DMC_MEMC_CMD]
 
-	ldr	r1, =DMC_DDR_REFRESH_PRD
+	ldr	r1, =DMC_DDR_REFRESH_PRD   /* memory refresh period=7800ns*/
 	str	r1, [r0, #INDEX_DMC_REFRESH_PRD]
 
+	/*set time para*/
 	ldr	r1, =DMC_DDR_CAS_LATENCY
 	str	r1, [r0, #INDEX_DMC_CAS_LATENCY]
 
@@ -89,19 +93,21 @@ mem_ctrl_asm_init:
 	ldr	r1, =DMC_DDR_t_ESR
 	str	r1, [r0, #INDEX_DMC_T_ESR]
 
+	/*set memery config*/
 	ldr	r1, =DMC1_MEM_CFG
 	str	r1, [r0, #INDEX_DMC_MEMORY_CFG]
 
 	ldr	r1, =DMC1_MEM_CFG2
 	str	r1, [r0, #INDEX_DMC_MEMORY_CFG2]
-
+	/*chip config*/
 	ldr	r1, =DMC1_CHIP0_CFG
 	str	r1, [r0, #INDEX_DMC_CHIP_0_CFG]
-
+	/*user config*/
 	ldr	r1, =DMC_DDR_32_CFG
 	str	r1, [r0, #INDEX_DMC_USER_CONFIG]
 
 	/* DMC0 DDR Chip 0 configuration direct command reg */
+	/* NOP command*/
 	ldr	r1, =DMC_NOP0
 	str	r1, [r0, #INDEX_DMC_DIRECT_CMD]
 
@@ -122,10 +128,10 @@ mem_ctrl_asm_init:
 	ldr	r1, =DMC_mDDR_MR0
 	str	r1, [r0, #INDEX_DMC_DIRECT_CMD]
 
-	/* Enable DMC1 */
+	/* makes DRAM Controller enter 'go' mode, Enable DMC1 */
 	mov	r1, #0x0
 	str	r1, [r0, #INDEX_DMC_MEMC_CMD]
-
+	/*wait ready*/
 check_dmc1_ready:
 	ldr	r1, [r0, #INDEX_DMC_MEMC_STATUS]
 	mov	r2, #0x3

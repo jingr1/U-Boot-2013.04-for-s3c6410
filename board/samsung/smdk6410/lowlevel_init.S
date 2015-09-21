@@ -30,13 +30,12 @@
  * MA 02111-1307 USA
  */
 
-
 #include <config.h>
 #include <version.h>
 
 #include <asm/arch/s3c6410.h>
 
-#ifdef CONFIG_SERIAL1
+#ifdef CONFIG_SERIAL1    /* we use SERIAL 1 on SMDK6410	*/
 #define ELFIN_UART_CONSOLE_BASE (ELFIN_UART_BASE + ELFIN_UART0_OFFSET)
 #elif defined(CONFIG_SERIAL2)
 #define ELFIN_UART_CONSOLE_BASE (ELFIN_UART_BASE + ELFIN_UART1_OFFSET)
@@ -48,9 +47,10 @@ _TEXT_BASE:
 	.word	CONFIG_SYS_TEXT_BASE
 
 	.globl lowlevel_init
-lowlevel_init:
+lowlevel_init:   /*call by start.S*/
 	mov	r12, lr
 
+	/*配置LED*/
 	/* LED on only #8 */
 	ldr	r0, =ELFIN_GPIO_BASE
 	ldr	r1, =0x00111111
@@ -58,18 +58,18 @@ lowlevel_init:
 
 	ldr	r1, =0x00000555
 	str	r1, [r0, #GPMPUD_OFFSET]
-
+	/* all of LEDs are power on*/
 	ldr	r1, =0x000f
 	str	r1, [r0, #GPMDAT_OFFSET]
-
-	/* Disable Watchdog */
+	/*关闭看门狗*/
+	/* Disable Watchdog, write 0 to 0x7e004000*/
 	ldr	r0, =0x7e000000		@0x7e004000
 	orr	r0, r0, #0x4000
 	mov	r1, #0
 	str	r1, [r0]
-
-	/* External interrupt pending clear */
-	ldr	r0, =(ELFIN_GPIO_BASE+EINTPEND_OFFSET)	/*EINTPEND*/
+	/*设置中断*/
+	/* External interrupt pending clear清除外部中断标志 */
+	ldr	r0, =(ELFIN_GPIO_BASE+EINTPEND_OFFSET)	/*EINTPEND 0x7f008924*/
 	ldr	r1, [r0]
 	str	r1, [r0]
 
@@ -91,16 +91,17 @@ lowlevel_init:
 	str	r3, [r0, #oVECTADDR]
 	str	r3, [r1, #oVECTADDR]
 
-	/* init system clock */
+
+	/* init system clock 配置系统时钟 */
 	bl system_clock_init
 
 #ifndef CONFIG_NAND_SPL
-	/* for UART */
+	/* for UART 串口初始化*/
 	bl uart_asm_init
 #endif
 
 #ifdef CONFIG_BOOT_NAND
-	/* simple init for NAND */
+	/* simple init for NAND flash */
 	bl nand_asm_init
 #endif
 
@@ -111,18 +112,18 @@ lowlevel_init:
 	mov	r1, #S3C64XX_MEM_SYS_CFG_NAND
 	str	r1, [r0]
 
-	bl	mem_ctrl_asm_init
+	bl	mem_ctrl_asm_init /*内存初始化 cpu_init.S*/
 
 /* Wakeup support. Don't know if it's going to be used, untested. */
 	ldr	r0, =(ELFIN_CLOCK_POWER_BASE + RST_STAT_OFFSET)
 	ldr	r1, [r0]
 	bic	r1, r1, #0xfffffff7
 	cmp	r1, #0x8
-	beq	wakeup_reset
+	beq	wakeup_reset /*唤醒复位初始化*/
 
 1:
-	mov	lr, r12
-	mov	pc, lr
+	mov	lr, r12      /* mov r12, lr*/
+	mov	pc, lr		 /* retern to start.S */
 
 wakeup_reset:
 
