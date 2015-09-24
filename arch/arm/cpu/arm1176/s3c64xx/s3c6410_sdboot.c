@@ -2,7 +2,7 @@
  * OK6410 SD Boot
  */
 
-#include <commom.h>
+#include <common.h>
 #include <asm/io.h>
 
 #ifdef CONFIG_MMC_CHANNEL
@@ -11,15 +11,15 @@
 #define MMC_CHANNEL 0
 #endif
 
-#define ELFIN_HSMMC_BASE (0x7c200000 + MMC_CHANNEL*0x10000)
-#define HM_CONTROL4      (ELFIN_HSMMC_BASE + 0x8C)
-#define globalBlockSizeHide *((volatile unsigned int *)(0x0c004000-0x04))
-#define globalSDHCInfo      *((volatile unsigned int *)(0x0c004000-0x08))
+#define ELFIN_HSMMC_BASE 	(0x7c200000 + MMC_CHANNEL*0x100000)
+#define HM_CONTROL4      	(ELFIN_HSMMC_BASE + 0x8C)
+#define globalBlockSizeHide 	*((volatile unsigned int *)(0x0c004000-0x04))
+#define globalSDHCInfo      	*((volatile unsigned int *)(0x0c004000-0x08))
 
-#define LAST_BLKPOS	   (globalBlockSizeHide - 2)
-#define BLK_SIZE	    512
-#define BL1_SIZE	    (1024*8)
-#define BL2_SIZE	    (1024*300)
+#define LAST_BLKPOS	   	(globalBlockSizeHide - 2)	
+#define BLK_SIZE	    	512
+#define BL1_SIZE	    	(1024*8)
+#define BL2_SIZE	    	(1024*300)
 
 #if 0
 #define ENV_SIZE		CONFIG_ENV_SIZE
@@ -38,7 +38,7 @@
 int BootCopyMMCtoMem()
 {
   writel(readl(HM_CONTROL4)|(0x3<<16),HM_CONTROL4);
-  return CopyMMCtoMem(0,STARTBLKADDR,BL2_BLKCNT,(uint *)DESTADDR,0);
+  return CopyMMCtoMem(MMC_CHANNEL,STARTBLKADDR,BL2_BLKCNT,(uint *)DESTADDR,0);
 }
 
 
