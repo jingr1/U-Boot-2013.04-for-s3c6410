@@ -274,6 +274,10 @@
 */
 
 /* Settings as above boot configuration */
+#ifdef CONFIG_BOOT_SD
+#define CONFIG_ENV_IS_IN_MMC
+#define CONFIG_SYS_MMC_ENV_DEV 0
+#endif
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_BOOTARGS		"console=ttySAC,115200"
 
@@ -282,13 +286,23 @@
 #define CONFIG_USB_S3C64XX
 #define CONFIG_USB_OHCI_NEW		1
 #define CONFIG_SYS_USB_OHCI_REGS_BASE		0x74300000
-#define CONFIG_SYS_USB_OHCI_SLOT_NAME		"s3c6400"
+#define CONFIG_SYS_USB_OHCI_SLOT_NAME		"s3c6410"
 #define CONFIG_SYS_USB_OHCI_MAX_ROOT_PORTS	3
 #define CONFIG_SYS_USB_OHCI_CPU_INIT		1
 
 #define CONFIG_USB_STORAGE	1
 #endif
 #define CONFIG_DOS_PARTITION	1
+
+/*support for mmc*/
+#define CONFIG_MMC
+#define CONFIG_CMD_FAT  /*compile cmd_fat.c to uboot*/
+#define CONFIG_GENERIC_MMC
+#define CONFIG_CMD_MMC
+#define CONFIG_SDHCI
+#define CONFIG_MMC_SDMA
+#define CONFIG_S3C6410_SDHCI
+
 
 #if defined(CONFIG_USB_OHCI_NEW) && defined(CONFIG_ENABLE_MMU)
 # error "usb_ohci.c is currently broken with MMU enabled."

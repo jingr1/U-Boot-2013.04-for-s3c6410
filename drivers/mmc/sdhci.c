@@ -164,7 +164,7 @@ int sdhci_send_command(struct mmc *mmc, struct mmc_cmd *cmd,
 		flags = SDHCI_CMD_RESP_LONG;
 	else if (cmd->resp_type & MMC_RSP_BUSY) {
 		flags = SDHCI_CMD_RESP_SHORT_BUSY;
-		mask |= SDHCI_INT_DATA_END;
+//		mask |= SDHCI_INT_DATA_END;
 	} else
 		flags = SDHCI_CMD_RESP_SHORT;
 
@@ -487,7 +487,7 @@ int add_sdhci(struct sdhci_host *host, u32 max_clk, u32 min_clk)
 		mmc->host_caps |= MMC_MODE_8BIT;
 	if (host->host_caps)
 		mmc->host_caps |= host->host_caps;
-
+	mmc->b_max = 1024;
 	sdhci_reset(host, SDHCI_RESET_ALL);
 	mmc_register(mmc);
 
