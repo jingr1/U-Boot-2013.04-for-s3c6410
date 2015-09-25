@@ -274,10 +274,12 @@
 */
 
 /* Settings as above boot configuration */
+/*
 #ifdef CONFIG_BOOT_SD
 #define CONFIG_ENV_IS_IN_MMC
 #define CONFIG_SYS_MMC_ENV_DEV 0
 #endif
+*/
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_BOOTARGS		"console=ttySAC,115200"
 
