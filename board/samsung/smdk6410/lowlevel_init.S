@@ -59,7 +59,7 @@ lowlevel_init:   /*call by start.S*/
 	ldr	r1, =0x00000555
 	str	r1, [r0, #GPMPUD_OFFSET]
 	/* all of LEDs are power on*/
-	ldr	r1, =0x000f
+	ldr	r1, =0x0005
 	str	r1, [r0, #GPMDAT_OFFSET]
 	/*πÿ±’ø¥√≈π∑*/
 	/* Disable Watchdog, write 0 to 0x7e004000*/
@@ -274,8 +274,8 @@ uart_asm_init:
 nand_asm_init:
 	ldr	r0, =ELFIN_NAND_BASE
 	ldr	r1, [r0, #NFCONF_OFFSET]
-	orr	r1, r1, #0x70
-	orr	r1, r1, #0x7700
+	orr	r1, r1, #0x1            /*TWRPH1 = 0*/
+	orr	r1, r1, #0x1300		/*TWRPH0 = 2, TACLS = 0*/
 	str	r1, [r0, #NFCONF_OFFSET]
 
 	ldr	r1, [r0, #NFCONT_OFFSET]
