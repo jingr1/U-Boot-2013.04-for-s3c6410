@@ -103,6 +103,17 @@ _main:    /*call by start.S*/
 #if defined(CONFIG_NAND_SPL)
 	/* deprecated, use instead CONFIG_SPL_BUILD */
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)  /*0x0c002000 smdk6410.h*/
+
+//        ldr     r0, = __bss_start        /* this is auto-relocated! */
+  //      ldr     r1, =__bss_end__        /* this is auto-relocated! */
+
+    //    mov     r2, #0x00000000         /* prepare zero to clear BSS */
+//bss_clean:cmp     r0, r1                  /* while not at end of BSS */
+  //     	  strlo   r2, [r0]                /* clear 32-bit BSS word */
+    //      addlo   r0, r0, #4              /* move to next */
+      //    blo     bss_clean
+	ldr 	pc, = nand_boot
+
 #elif defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_STACK)
 	ldr	sp, =(CONFIG_SPL_STACK)
 #else

@@ -659,6 +659,22 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 						(u_char *)addr,
 						WITH_DROP_FFS);
 #endif
+		}else if((!read) && (s != NULL) && (!strcmp(s, ".uboot")) && nand->writesize == 4096){
+			rwsize = 4096;
+			nand_write(nand, off, &rwsize, (u_char *)addr);
+			off+=  4096;
+			addr+= 2048;
+			nand_write(nand, off, &rwsize, (u_char *)addr);
+                        off+=  4096;
+                        addr+= 2048;
+			nand_write(nand, off, &rwsize, (u_char *)addr);
+                        off+=  4096;
+                        addr+= 2048;
+			nand_write(nand, off, &rwsize, (u_char *)addr);
+                        off+=  4096;
+                        addr+= 2048;
+			rwsize = CONFIG_SYS_NAND_U_BOOT_SIZE - 8*1024;
+			ret = nand_write(nand, off, &rwsize, (u_char *)addr);
 #ifdef CONFIG_CMD_NAND_YAFFS
 		} else if (!strcmp(s, ".yaffs")) {
 			if (read) {
@@ -666,6 +682,8 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 				return 1;
 			}
 			ret = nand_write_skip_bad(nand, off, &rwsize,
+
+q
 						(u_char *)addr,
 						WITH_INLINE_OOB);
 #endif
