@@ -79,9 +79,24 @@
 /*
  * Hardware drivers
  */
+#if 0
 #define CONFIG_CS8900			/* we have a CS8900 on-board	*/
 #define CONFIG_CS8900_BASE	  	0x18800300
 #define CONFIG_CS8900_BUS16		/* follow the Linux driver	*/
+#endif
+
+#define CONFIG_DM9000                   /* we have a CS8900 on-board    */
+#define CONFIG_DM9000_BASE              0x18000000 /*SROMC Bank 1, CSN1*/
+#define CONFIG_DM9000_NO_SROM		1
+#define CONFIG_DRIVER_DM9000		1
+#define CONFIG_DM9000_USE_16BIT             /* follow the Linux driver      */
+#define DM9000_IO 			CONFIG_DM9000_BASE
+#define DM9000_DATA 			(CONFIG_DM9000_BASE + 0x4)
+#define CONFIG_ETHADDR			00:40:5c:26:0a:5b
+#define CONFIG_NETMASK			255.255.255.0
+#define CONFIG_IPADDR			192.168.0.110
+#define CONFIG_SERVERIP			192.168.0.101
+#define CONFIG_GATEWAYIP		192.168.0.1
 
 /*
  * select serial console configuration
@@ -259,7 +274,7 @@
 				 56, 57, 58, 59, 60, 61, 62, 63}
 
 /* Boot configuration (define only one of next 4) */
-#define CONFIG_BOOT_SD  /*SD BOOT*/
+//#define CONFIG_BOOT_SD  /*SD BOOT*/
 #define CONFIG_BOOT_NAND
 /* None of these are currently implemented. Left from the original Samsung
  * version for reference

@@ -59,7 +59,7 @@ lowlevel_init:   /*call by start.S*/
 	ldr	r1, =0x00000555
 	str	r1, [r0, #GPMPUD_OFFSET]
 	/* all of LEDs are power on*/
-	ldr	r1, =0x0005
+	ldr	r1, =0x0009
 	str	r1, [r0, #GPMDAT_OFFSET]
 	/*πÿ±’ø¥√≈π∑*/
 	/* Disable Watchdog, write 0 to 0x7e004000*/
